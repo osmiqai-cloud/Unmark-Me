@@ -150,6 +150,8 @@ function cleanDistBuildOutputs() {
   if (!existsSync('dist')) return;
   for (const entry of [
     'app.js',
+    'background-app.js',
+    'background.html',
     'dev-preview.html',
     'extension',
     'extension-local',
@@ -377,6 +379,27 @@ const pricingWebsiteCtx = await esbuild.context({
   sourcemap: !isProd,
 });
 
+const backgroundWebsiteCtx = await esbuild.context({
+  ...commonConfig,
+  entryPoints: ['src/background-app.js'],
+  outfile: 'dist/background-app.js',
+  platform: 'browser',
+  target: ['es2020'],
+  banner: { js: jsBanner },
+  sourcemap: !isProd,
+});
+
+// Background removal runs onnxruntime-web in its own module worker.
+const backgroundWorkerCtx = await esbuild.context({
+  ...commonConfig,
+  entryPoints: ['src/workers/backgroundWorker.js'],
+  outfile: 'dist/workers/background-worker.js',
+  platform: 'browser',
+  format: 'esm',
+  target: ['es2022'],
+  sourcemap: !isProd,
+});
+
 // Build website worker
 const workerCtx = await esbuild.context({
   ...commonConfig,
@@ -477,6 +500,8 @@ if (isProd) {
     websiteCtx.rebuild(),
     videoWebsiteCtx.rebuild(),
     pricingWebsiteCtx.rebuild(),
+    backgroundWebsiteCtx.rebuild(),
+    backgroundWorkerCtx.rebuild(),
     workerCtx.rebuild(),
     userscriptCtx.rebuild(),
     extensionMainCtx.rebuild(),
@@ -492,6 +517,8 @@ if (isProd) {
     websiteCtx.watch(),
     videoWebsiteCtx.watch(),
     pricingWebsiteCtx.watch(),
+    backgroundWebsiteCtx.watch(),
+    backgroundWorkerCtx.watch(),
     workerCtx.watch(),
     userscriptCtx.watch(),
     extensionMainCtx.watch(),

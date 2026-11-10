@@ -154,6 +154,12 @@
     }
     .nav-link:hover { color: var(--label); }
     .nav-link[aria-current="page"] { color: var(--label); font-weight: 500; background: var(--fill); }
+    /* Four links share a phone-width bar with the account and theme buttons
+       (same rules as dev-preview.css). */
+    .nav-end { min-width: 0; margin-left: auto; }
+    .nav-links { min-width: 0; margin: -6px -5px; padding: 6px 5px; overflow-x: auto; scrollbar-width: none; }
+    .nav-links::-webkit-scrollbar { display: none; }
+    .nav-link { flex: none; white-space: nowrap; }
 
     /* ---------- Page ---------- */
 
@@ -1089,8 +1095,19 @@
       .actions .primary, .actions .download-link { order: -1; flex-basis: 40%; }
     }
 
+    @media (max-width: 480px) {
+      .nav-inner { gap: 10px; }
+      .nav-links { gap: 0; }
+      .nav-link { padding: 6px 7px; font-size: 0.8125rem; }
+    }
+
     @media (max-width: 420px) {
       .brand-name { display: none; }
+    }
+
+    @media (max-width: 400px) {
+      .brand { display: none; }
+      .nav-link { padding: 6px 6px; }
     }
 
     /* ---------- Accessibility preferences ---------- */
@@ -1122,6 +1139,7 @@
         <nav class="nav-links" aria-label="Main">
           <a href="./" class="nav-link">Images</a>
           <a href="./video-preview.html" class="nav-link" aria-current="page">Video</a>
+          <a href="./background.html" class="nav-link">Background</a>
           <a href="./pricing.html" class="nav-link">Pricing</a>
         </nav>
         <button id="accountButton" class="account-button" type="button" aria-haspopup="dialog">

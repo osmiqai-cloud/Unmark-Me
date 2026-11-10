@@ -75,6 +75,7 @@
     "dev": "node build.js",
     "build": "node build.js --prod",
     "clean": "node scripts/clean.js",
+    "models:rembg": "node scripts/fetch-rembg-models.js",
     "clean:all": "node scripts/clean.js --include-profile",
     "convert:samples:webp": "node scripts/convert-samples-to-webp.js",
     "diagnose:same-anchor-imperfection": "node scripts/run-same-anchor-imperfection-review.js",

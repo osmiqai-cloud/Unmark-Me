@@ -169,6 +169,19 @@ This tool targets Gemini's visible watermark (the semi-transparent logo in the b
 
 👉 **[pilio.ai/image-watermark-remover](https://pilio.ai/image-watermark-remover)**
 
+### Background Remover
+
+`/background.html` removes the background from a photo in the browser, using a JavaScript port of [rembg](https://github.com/danielgatis/rembg) (MIT). It runs one of two rembg models with onnxruntime-web, on WebGPU when available and WebAssembly otherwise:
+
+| Option | rembg model | Input | Download | Model license |
+| --- | --- | --- | --- | --- |
+| Fast | `u2netp` | 320 × 320 | 4.6 MB | Apache-2.0 ([U²-Net](https://github.com/xuebinqin/U-2-Net)) |
+| Best | `isnet-general-use` | 1024 × 1024 | 179 MB, cached after the first use | Apache-2.0 ([DIS](https://github.com/xuebinqin/DIS)) |
+
+The raw rembg mask is then cleaned up (`src/background/matteRefine.js`). The models output a confidence, so unsure areas come out half transparent: faint smears of background, or faded and missing parts of the subject. A gentle curve fades low-confidence pixels and solidifies high-confidence ones; on plain backdrops (studio sweeps, walls, sky), unsure pixels that clearly aren't backdrop colour are kept as subject, ignoring shadows; and edge pixels are recoloured to remove the old backdrop's fringe.
+
+The models aren't in git. `pnpm models:rembg` downloads them from rembg's release, checks them against rembg's md5 sums, and copies them to `dist/models/rembg/`. The Vercel build runs it automatically; run it once locally after `pnpm dev` or `pnpm build`.
+
 ### Developer Preview
 
 The repository still keeps a local internal preview harness at `/dev-preview.html` for single-image comparison, copy, and download verification.

@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Remove Background — Unmark Me</title>
+  <meta name="description" content="Remove the background from any photo, right in your browser. Nothing is uploaded.">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="theme-color" content="#f5f5f7">
+  <script>
+    // Apply the saved (or system) theme before first paint so the page never flashes.
+    (() => {
+      let saved = null;
+      try { saved = localStorage.getItem('unmark-theme'); } catch (error) {}
+      const dark = saved ? saved === 'dark' : window.matchMedia('(prefers-color-scheme: dark)').matches;
+      document.documentElement.dataset.theme = dark ? 'dark' : 'light';
+      document.querySelector('meta[name="theme-color"]').content = dark ? '#000000' : '#f5f5f7';
+    })();
+  </script>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%231d1d1f'/%3E%3Cpath d='M16 7.5l-2 6.5-6.5 2 6.5 2 2 6.5 2-6.5 6.5-2-6.5-2z' fill='%23fff'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="dev-preview.css">
+  <link rel="stylesheet" href="background.css">
+</head>
+<body class="bg-page" data-view="home">
+  <header class="nav">
+    <div class="nav-inner">
+      <a href="./" class="brand" aria-label="Unmark Me home">
+        <span class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><path d="M12 3.5l-1.7 5.3-5.3 1.7 5.3 1.7 1.7 5.3 1.7-5.3 5.3-1.7-5.3-1.7z"/></svg>
+        </span>
+        <span class="brand-name">Unmark Me</span>
+      </a>
+      <div class="nav-end">
+        <nav class="nav-links" aria-label="Main">
+          <a href="./" class="nav-link">Images</a>
+          <a href="./video-preview.html" class="nav-link">Video</a>
+          <a href="./background.html" class="nav-link" aria-current="page">Background</a>
+          <a href="./pricing.html" class="nav-link">Pricing</a>
+        </nav>
+        <button id="accountButton" class="account-button" type="button" aria-haspopup="dialog">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8.5" r="3.5"/><path d="M5 19.5c1.3-3.2 4-4.8 7-4.8s5.7 1.6 7 4.8"/></svg>
+          <span class="account-label">Log in</span>
+        </button>
+        <button id="themeSwitch" class="theme-pull" type="button" role="switch" aria-checked="false" aria-label="Dark mode">
+          <span class="theme-pull-cord" aria-hidden="true"></span>
+          <span class="theme-pull-bulb" aria-hidden="true"></span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="page">
+    <section class="hero">
+      <h1 class="display">Remove backgrounds.</h1>
+      <p class="lede">Cut out the subject of any photo in seconds. It runs on your device, so your images are never uploaded.</p>
+
+      <div id="uploadArea" class="dropzone" role="button" tabindex="0" aria-label="Choose an image">
+        <div class="dropzone-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V4m0 0L7.5 8.5M12 4l4.5 4.5"/><path d="M4 15v2.5A2.5 2.5 0 006.5 20h11a2.5 2.5 0 002.5-2.5V15"/></svg>
+        </div>
+        <p class="dropzone-title">Drop an image here</p>
+        <p class="dropzone-hint">or <span class="link-text">browse your files</span> · you can also paste</p>
+        <p class="dropzone-formats">JPG, PNG, WebP up to 20 MB</p>
+        <input type="file" id="fileInput" accept="image/jpeg,image/png,image/webp" class="hidden" />
+      </div>
+
+      <p id="homeStatus" class="home-status" role="status" aria-live="polite"></p>
+
+      <p class="privacy-note">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="2.5"/><path d="M8.5 11V8a3.5 3.5 0 017 0v3"/></svg>
+        Private by design. Your images never leave this browser.
+      </p>
+    </section>
+
+    <section id="workspace" class="workspace" style="display: none;" aria-label="Result">
+      <div class="viewer card">
+        <div class="stage">
+          <div id="comparisonContainer" class="cmp w-fit max-w-full" role="slider" tabindex="-1" aria-label="Compare original and cutout" aria-valuemin="0" aria-valuemax="100" aria-valuenow="50">
+            <div id="processedOverlay" class="cmp-after" style="display: none;">
+              <img id="processedImage" class="cmp-img" alt="Image with the background removed" draggable="false" />
+            </div>
+            <img id="originalImage" class="cmp-before w-auto h-auto max-w-full" alt="Original image" draggable="false" />
+            <span class="cmp-tag cmp-tag-before" aria-hidden="true">Before</span>
+            <span class="cmp-tag cmp-tag-after" aria-hidden="true">After</span>
+            <svg class="cmp-line" aria-hidden="true" preserveAspectRatio="none"><path /></svg>
+            <span id="sliderHandle" class="cmp-grip" style="display: none;" aria-hidden="true">
+              <span class="cmp-knob">
+                <svg width="16" height="10" viewBox="0 0 16 10"><path d="M5 1 1 5l4 4M11 1l4 4-4 4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" /></svg>
+              </span>
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <aside class="inspector card" aria-label="Details and actions">
+        <div id="resultInfo" class="meta"></div>
+        <div class="bg-progress" hidden><span id="progressBar"></span></div>
+
+        <div class="bg-controls">
+          <div class="bg-field">
+            <p class="bg-field-label" id="modelLabel">Quality</p>
+            <div class="segmented" role="radiogroup" aria-labelledby="modelLabel" aria-describedby="modelHint">
+              <button type="button" role="radio" class="segment" data-model="fast" aria-checked="true">Fast</button>
+              <button type="button" role="radio" class="segment" data-model="best" aria-checked="false" tabindex="-1">Best</button>
+            </div>
+            <p class="bg-field-hint" id="modelHint"></p>
+          </div>
+
+          <div class="bg-field">
+            <p class="bg-field-label" id="backgroundLabel">Background</p>
+            <div class="swatches" role="radiogroup" aria-labelledby="backgroundLabel">
+              <button type="button" role="radio" class="swatch swatch-clear" data-background="transparent" aria-checked="true" aria-label="Transparent" title="Transparent"></button>
+              <button type="button" role="radio" class="swatch" data-background="#ffffff" style="--swatch: #ffffff;" aria-checked="false" aria-label="White" title="White" tabindex="-1"></button>
+              <button type="button" role="radio" class="swatch" data-background="#000000" style="--swatch: #000000;" aria-checked="false" aria-label="Black" title="Black" tabindex="-1"></button>
+              <button type="button" role="radio" class="swatch swatch-custom" data-background="custom" style="--swatch: #0071e3;" aria-checked="false" aria-label="Custom color" title="Custom color" tabindex="-1"></button>
+              <input type="color" id="customColor" class="swatch-picker" value="#0071e3" tabindex="-1" aria-hidden="true">
+            </div>
+          </div>
+        </div>
+
+        <div class="actions">
+          <button id="downloadBtn" class="btn btn-primary" type="button" disabled>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11m0 0l-4.5-4.5M12 15l4.5-4.5M5 20h14"/></svg>
+            <span>Download PNG</span>
+          </button>
+          <button id="copyBtn" class="btn btn-secondary" type="button" disabled>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="8" width="12" height="12" rx="2.5"/><path d="M16 8V6.5A2.5 2.5 0 0013.5 4h-7A2.5 2.5 0 004 6.5v7A2.5 2.5 0 006.5 16H8"/></svg>
+            <span>Copy</span>
+          </button>
+          <button id="resetBtn" class="btn btn-plain" type="button">
+            <span>Choose another image</span>
+          </button>
+        </div>
+        <div id="statusMessage" class="status-message" role="status" aria-live="polite"></div>
+      </aside>
+    </section>
+  </main>
+
+  <script src="background-app.js"></script>
+</body>
+</html>

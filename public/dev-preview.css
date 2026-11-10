@@ -216,6 +216,23 @@ img { -webkit-user-drag: none; }
   background: var(--fill);
 }
 
+/* Four links share a phone-width bar with the account and theme buttons. They
+   tighten on small screens and, on the narrowest, scroll sideways rather than
+   push the buttons off screen. The padding keeps focus rings unclipped. */
+.nav-end { min-width: 0; margin-left: auto; }
+
+.nav-links {
+  min-width: 0;
+  margin: -6px -5px;
+  padding: 6px 5px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.nav-links::-webkit-scrollbar { display: none; }
+
+.nav-link { flex: none; white-space: nowrap; }
+
 /* ---------- Theme pull switch ---------- */
 
 .nav-end {
@@ -1303,8 +1320,20 @@ body[data-view="batch"] .hero { display: none; }
   .batch-list { overflow: visible; }
 }
 
+@media (max-width: 480px) {
+  .nav-inner { gap: 10px; }
+  .nav-links { gap: 0; }
+  .nav-link { padding: 6px 7px; font-size: 0.8125rem; }
+}
+
 @media (max-width: 420px) {
   .brand-name { display: none; }
+}
+
+/* "Images" is the home link, so the logo can make room for the links. */
+@media (max-width: 400px) {
+  .brand { display: none; }
+  .nav-link { padding: 6px 6px; }
 }
 
 /* ---------- Accessibility preferences ---------- */
